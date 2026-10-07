@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LION'S Desktop PC Building Calculator</title>
+<style>
+:root{--bg:#faf9f6;--card:#fff;--tx:#1c1b19;--mu:#77736b;--bd:#e7e3da;--ac:#c2751a;--ok:#2e7d4f;--wr:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151412;--card:#1e1d1a;--tx:#f0ede6;--mu:#9b968a;--bd:#33312c;--ac:#e8a04a;--ok:#6cc08b;--wr:#f2877f}}
+:root[data-theme="dark"]{--bg:#151412;--card:#1e1d1a;--tx:#f0ede6;--mu:#9b968a;--bd:#33312c;--ac:#e8a04a;--ok:#6cc08b;--wr:#f2877f}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-size:22px;margin:0;letter-spacing:.5px}h1 span{color:var(--ac)}
+.sub{color:var(--mu);font-size:13px}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 14px;border-radius:8px}
+button:hover{border-color:var(--ac)}button.p{background:var(--ac);border-color:var(--ac);color:#fff}
+.g{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+@media(max-width:860px){.g{grid-template-columns:1fr}}
+.sec{margin-bottom:22px}.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.sh h2{font-size:15px;margin:0;font-weight:600}.sh h2 i{font-style:normal;color:var(--mu);margin-right:6px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:10px;display:flex;gap:14px}
+.th{width:84px;height:84px;border-radius:8px;background:var(--bg);border:1px solid var(--bd);flex:none;display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden}
+.th img{width:100%;height:100%;object-fit:cover}
+.bd{flex:1;min-width:0}.t{font-weight:600}.pr{color:var(--ac);font-weight:700;white-space:nowrap}
+.top{display:flex;justify-content:space-between;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.chips span{background:var(--bg);border:1px solid var(--bd);border-radius:20px;padding:1px 9px;font-size:12px;color:var(--mu)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}.acts button{padding:3px 10px;font-size:12px}
+.more{display:none;margin-top:8px;border-top:1px dashed var(--bd);padding-top:8px;font-size:13px}
+.more.o{display:block}.more div{display:flex;justify-content:space-between;gap:12px;padding:2px 0}.more b{color:var(--mu);font-weight:500}.more em{font-style:normal;text-align:right}
+.empty{color:var(--mu);font-size:13px;border:1px dashed var(--bd);border-radius:12px;padding:12px}
+.sum{position:sticky;top:12px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px}
+.sum h3{margin:0 0 10px;font-size:15px}.row{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:3px 0;border-bottom:1px solid var(--bd)}
+.tot{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin:12px 0}.tot span:last-child{color:var(--ac)}
+.w{font-size:12.5px;color:var(--wr);margin:4px 0}.k{font-size:12.5px;color:var(--ok)}
+.bt{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);width:min(640px,94vw);padding:18px;max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+label{display:block;font-size:12px;color:var(--mu)}
+input,select{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--bd);border-radius8px;border-radius:8px;background:var(--bg);color:var(--tx);margin-top:2px}
+@media print{.acts,.bt,header button,.sh button{display:none}.g{display:block}.sum{position:static}}
+</style></head><body><div class="wrap">
+<header><div><h1>🦁 LION'S <span>Desktop PC Building Calculator</span></h1><div class="sub">Add parts, compare prices in BDT ৳, get your total.</div></div>
+<button id="th">☾ / ☀</button></header>
+<div class="g"><main id="main"></main>
+<aside class="sum" id="sum"></aside></div></div>
+<dialog id="dlg"><form method="dialog" id="frm"></form></dialog>
+<script>
+const W=['Manufacturer','Distributor','Seller'],YN=['Yes','No'],FOR=['AMD','Intel'],RT=['DDR3','DDR4','DDR5'];
+// field: [key,label,type(t|n|s),extra(unit or options)]
+const EXF=[['name','Item / Software Name','t'],['brand','Brand','t'],['model','Model','t'],['col','Colour','t'],['det','Other Details','t']];
+const C=[
+{id:'cpu',n:'CPU / Processor',i:'🧠',f:[['brand','Brand','s',FOR],['model','Model','t'],['gen','Generation','t'],['mspeed','Memory Speed (up to MHz)','n'],['base','Base Frequency (GHz)','n'],['turbo','Max Turbo (GHz)','n'],['cache','Cache (e.g. L2 8MB, L3 32MB)','t'],['cores','Cores','n'],['threads','Threads','n'],['igpu','Built-in Graphics','s',YN],['igpun','Graphics Name (if Yes)','t'],['fan','Stock Fan','s',YN]]},
+{id:'cool',n:'CPU Cooler',i:'❄️',f:[['for','For','s',FOR],['brand','Brand','t'],['model','Model','t'],['type','Type','s',['Air','Liquid','Hybrid']],['aio','AIO?','s',['AIO','Non AIO']],['size','Size (mm)','n'],['rpm','Fan Speed (RPM ±10%, e.g. 600-1800)','t'],['cfm','Airflow (CFM)','n'],['noise','Noise (dBA)','n'],['mat','Material','t'],['rgb','Lighting','s',['None','RGB','ARGB']],['wt','Weight (g)','n']]},
+{id:'mb',n:'Motherboard',i:'🔌',f:[['for','For','s',FOR],['brand','Brand','t'],['model','Model','t'],['ff','Form Factor','s',['ATX','Extended ATX','Micro ATX','Mini ITX']],['ram','Supported RAM','s',RT],['feat','Special Features (CrossFireX/Wi-Fi/SLI/M.2)','t'],['usb','USB Ports & Gen (e.g. 4x USB3.2 Gen1, 2x USB2.0)','t'],['audio','Audio Output Ports','t'],['hdmi','HDMI Ports','n'],['dp','DisplayPort Ports','n']]},
+{id:'gpu',n:'Graphics Card',i:'🎮',m:1,f:[['for','For','s',['AMD','Intel','NVIDIA']],['brand','Brand','t'],['model','Model','t'],['rtx','RTX / Non-RTX','s',['RTX','Non-RTX']],['ti','Ti / Non-Ti','s',['Ti','Non-Ti']],['oc','OC / Non-OC','s',['OC','Non-OC']],['chip','Chipset Name','t'],['series','Chipset Series','t'],['vram','Memory (GB)','n'],['mspeed','Memory Speed','t'],['mtype','Memory Type','s',['GDDR3','GDDR4','GDDR5','GDDR6','GDDR7']],['fans','Fans','n'],['ptype','Port Type','t'],['ports','Number of Ports','n'],['boost','Boost Clock (MHz)','n'],['shader','Shader Clock','t'],['out','Display Outputs','t'],['psu','Recommended PSU (W)','n']]},
+{id:'ram',n:'RAM',i:'💾',m:1,f:[['for','For','s',FOR],['brand','Brand','t'],['model','Model','t'],['cap','Capacity (GB)','n'],['type','Memory Type','s',RT],['bus','BUS Speed (MHz)','n']]},
+{id:'sto',n:'Storage',i:'🗄️',m:1,f:[['brand','Brand','t'],['model','Model','t'],['gen','Generation','t'],['type','Type','s',['HDD','SATA SSD','M.2']],['tech','Technology','s',['AHCI','NVMe']],['cap','Capacity (e.g. 512 GB / 1 TB)','t'],['iface','Interface','s',['SATA','PCI-E']],['dram','DRAM','s',['With DRAM','DRAM-less']],['rd','Read (MB/s)','n'],['wr','Write (MB/s)','n'],['temp','Operating Temp (e.g. 0-70 °C)','t']]},
+{id:'psu',n:'Power Supply (PSU)',i:'⚡',f:[['brand','Brand','t'],['model','Model','t'],['watt','Wattage (W)','n'],['mod','Modular','s',['Full','Semi','Non']],['eff','Efficiency / Certification (80+ Bronze...)','t']]},
+{id:'case',n:'Casing',i:'🧱',f:[['brand','Brand','t'],['model','Model','t'],['size','Size','s',['Standard','Full-Tower','Mid-Tower','Micro-Tower','Mini-Tower']],['mbs','Supported Motherboards','t'],['side','Side Panel','s',['No','Full-Window','Half-Window','Tempered Glass','Plastic','Solid','Mesh']],['psub','Built-in PSU','s',YN],['feat','Special Feature Notes','t'],['hp','Headphone Port','s',YN],['mic','Mic Port','s',YN],['wt','Weight (kg)','n'],['fp','Front Ports (number & note)','t'],['slots','Expansion Slots','n'],['rad','Radiator Support (mm, multiple)','t'],['fsup','Fan Support (number & mm, multiple)','t']]},
+{id:'cf',n:'Casing Cooler / Fan',i:'🌀',m:1,f:[['brand','Brand','t'],['model','Model','t'],['size','Size (mm)','n'],['col','Colour','t'],['cw','Colour Warranty','s',YN]]},
+{id:'mon',n:'Monitor',i:'🖥️',m:1,f:[['brand','Brand','t'],['model','Model','t'],['size','Screen Size (inch)','n'],['res','Resolution (e.g. 1920x1080)','t'],['panel','Panel','s',['IPS','VA','TN','OLED']],['hz','Refresh Rate (Hz)','n'],['ms','Response Time (ms)','n'],['curve','Shape','s',['Flat','Curved']],['ports','Ports (HDMI/DP...)','t'],['col','Colour','t']]},
+{id:'mouse',n:'Mouse',i:'🖱️',m:1,f:[['brand','Brand','t'],['model','Model','t'],['conn','Connection','s',['Wired','Wireless','Both']],['dpi','DPI','n'],['btn','Buttons','n'],['rgb','Lighting','s',['None','RGB','ARGB']],['col','Colour','t']]},
+{id:'kb',n:'Keyboard',i:'⌨️',m:1,f:[['brand','Brand','t'],['model','Model','t'],['type','Type','s',['Mechanical','Membrane','Optical']],['conn','Connection','s',['Wired','Wireless','Both']],['layout','Layout (Full/TKL/60%)','t'],['sw','Switch Type','t'],['rgb','Lighting','s',['None','RGB','ARGB']],['col','Colour','t']]},
+{id:'desk',n:'Desk / Table',i:'🪑',m:1,f:[['brand','Brand','t'],['model','Model','t'],['mat','Material','t'],['dim','Size (L x W x H)','t'],['adj','Height Adjustable','s',YN],['col','Colour','t']]},
+{id:'chair',n:'Chair',i:'💺',m:1,f:[['brand','Brand','t'],['model','Model','t'],['type','Type','s',['Gaming','Office','Ergonomic']],['mat','Material','t'],['feat','Features (armrest, recline...)','t'],['col','Colour','t']]},
+{id:'light',n:'Light',i:'💡',m:1,f:[['brand','Brand','t'],['model','Model','t'],['type','Type (Desk lamp / LED strip...)','t'],['watt','Wattage (W)','n'],['col','Colour','t']]},
+{id:'foot',n:'Foot Rest',i:'🦶',m:1,f:[['brand','Brand','t'],['model','Model','t'],['mat','Material','t'],['adj','Adjustable','s',YN],['col','Colour','t']]},
+{id:'ex',n:'Other Accessories & Software',i:'🧩',m:1,f:EXF}
+];
+const CS=()=>C.concat((S._c||[]).map(c=>({id:c.id,n:c.n,i:'➕',m:1,custom:1,f:EXF})));
+function addSec(){const n=prompt('New section name (e.g. Speakers, UPS, Webcam, Headset):');if(!n||!n.trim())return;(S._c=S._c||[]).push({id:'c'+Date.now(),n:n.trim()});save();render()}
+function delSec(id){if(confirm('Delete this section and all its items?')){S._c=S._c.filter(c=>c.id!=id);delete S[id];save();render()}}
+const COM=[['wby','Warranty By','s',W],['wy','Warranty (years)','n'],['price','Regular Price (BDT ৳)','n'],['pdate','Price Date','d'],['qty','Quantity','n']];
+let S={};try{S=JSON.parse(localStorage.getItem('lion_pc')||'{}')}catch(e){}
+const save=()=>{try{localStorage.setItem('lion_pc',JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>'৳ '+Math.round(n).toLocaleString('en-IN');
+const items=c=>S[c]||(S[c]=[]);
+const lt=it=>(+it.price||0)*(+it.qty||1);
+const title=(c,it)=>[it.brand||it.for,it.model||it.name].filter(Boolean).join(' ')||'Untitled';
+function render(){
+ document.getElementById('main').innerHTML=CS().map((c,k)=>{
+  const l=items(c.id),can=c.m||!l.length;
+  return `<section class="sec"><div class="sh"><h2><i>#${k+1}</i>${c.i} ${c.n}</h2><div class="acts">${c.custom?`<button onclick="delSec('${c.id}')">Delete section</button>`:''}${can?`<button class="p" onclick="edit('${c.id}',-1)">+ Add</button>`:''}</div></div>`+
+  (l.length?l.map((it,x)=>{
+   const feats=c.f.filter(f=>it[f[0]]).slice(0,6).map(f=>`<span>${esc(it[f[0]])}${f[2]=='n'?'':''}</span>`).join('');
+   const det=c.f.concat(COM.slice(0,2)).filter(f=>it[f[0]]).map(f=>{let v=it[f[0]];if(f[0]=='wy')v+=' yr';return `<div><b>${f[1]}</b><em>${esc(v)}</em></div>`}).join('')+
+    (it.pdate?`<div><b>Price Date</b><em>${esc(it.pdate)}</em></div>`:'')+(it.note?`<div><b>Notes</b><em>${esc(it.note)}</em></div>`:'');
+   return `<div class="card"><div class="th">${it.img?`<img src="${it.img}" alt="">`:c.i}</div><div class="bd">
+   <div class="top"><div class="t">${esc(title(c,it))}</div><div class="pr">${fmt(lt(it))}${(+it.qty||1)>1?` <small>(${it.qty}×)</small>`:''}</div></div>
+   <div class="chips">${feats}</div>
+   <div class="acts"><button onclick="this.closest('.bd').querySelector('.more').classList.toggle('o')">View More Info</button><button onclick="edit('${c.id}',${x})">Edit</button><button onclick="del('${c.id}',${x})">Remove</button></div>
+   <div class="more">${det}</div></div></div>`}).join(''):`<div class="empty">No ${c.n} added yet.</div>`)+`</section>`}).join('')+`<button class="p" onclick="addSec()">+ Add new section (Speakers, UPS, Webcam, anything...)</button>`;
+ summary();
+}
+function summary(){
+ let tot=0,rows='';
+ CS().forEach(c=>items(c.id).forEach(it=>{tot+=lt(it);rows+=`<div class="row"><span>${c.i} ${esc(title(c,it))}${(+it.qty||1)>1?' ×'+it.qty:''}</span><span>${fmt(lt(it))}</span></div>`}));
+ const w=check();
+ document.getElementById('sum').innerHTML=`<h3>Build Summary</h3>${rows||'<div class="sub">Nothing added yet.</div>'}<div class="tot"><span>Total</span><span>${fmt(tot)}</span></div>`+
+  (w.length?w.map(x=>`<div class="w">⚠ ${x}</div>`).join(''):(tot?'<div class="k">✓ No compatibility issues found</div>':''))+
+  `<div class="bt"><button onclick="copyS()">Copy list</button><button onclick="print()">Print</button><button onclick="if(confirm('Clear the whole build?')){S={};save();render()}">Reset</button></div>`;
+}
+function check(){
+ const w=[],g=id=>items(id)[0]||{},cpu=g('cpu'),mb=g('mb'),cs=g('case'),psu=g('psu');
+ if(cpu.brand&&mb.for&&cpu.brand!=mb.for)w.push(`CPU is ${cpu.brand} but motherboard is for ${mb.for}.`);
+ const rams=items('ram');if(mb.ram)rams.forEach(r=>{if(r.type&&r.type!=mb.ram)w.push(`RAM ${r.type} doesn't match motherboard (${mb.ram}).`)});
+ if(mb.ff&&cs.mbs&&!cs.mbs.toLowerCase().includes(mb.ff.toLowerCase().replace('mini itx','itx').replace('extended ','e-')))w.push(`Case may not support ${mb.ff} motherboard (check case support list).`);
+ const need=Math.max(0,...items('gpu').map(x=>+x.psu||0));if(need&&+psu.watt&&+psu.watt<need)w.push(`PSU ${psu.watt}W is below GPU recommended ${need}W.`);
+ if(cpu.igpu=='No'&&!items('gpu').length&&cpu.model)w.push('CPU has no built-in graphics and no GPU is added.');
+ return w;
+}
+function edit(cid,x){
+ const c=CS().find(a=>a.id==cid),it=x<0?{qty:1}:{...items(cid)[x]};
+ const fld=f=>{const v=it[f[0]]??'';const a=`name="${f[0]}"`;
+  const inp=f[2]=='s'?`<select ${a}><option value=""></option>${f[3].map(o=>`<option${o==v?' selected':''}>${o}</option>`).join('')}</select>`:`<input ${a} type="${f[2]=='n'?'number':f[2]=='d'?'date':'text'}" ${f[2]=='n'?'step="any" min="0"':''} value="${esc(v)}">`;
+  return `<label>${f[1]}${inp}</label>`};
+ frm.innerHTML=`<h3 style="margin:0 0 12px">${c.i} ${x<0?'Add':'Edit'} ${c.n}</h3><div class="fg">${c.f.concat(COM).map(fld).join('')}<label>Notes<input name="note" value="${esc(it.note)}"></label><label>Product Image (optional)<input type="file" id="im" accept="image/*"></label></div>
+ <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button type="button" onclick="dlg.close()">Cancel</button><button type="button" class="p" id="sv">Save</button></div>`;
+ if(!frm.pdate.value)frm.pdate.value=new Date().toISOString().slice(0,10);
+ sv.onclick=async()=>{
+  const o={img:it.img};new FormData(frm).forEach((v,k)=>{if(typeof v=='string')o[k]=v});
+  if(im.files[0])o.img=await shrink(im.files[0]);
+  if(x<0)items(cid).push(o);else items(cid)[x]=o;
+  save();dlg.close();render()};
+ dlg.showModal();
+}
+function shrink(file){return new Promise(r=>{const i=new Image();i.onload=()=>{const s=Math.min(1,200/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.7))};i.onerror=()=>r('');i.src=URL.createObjectURL(file)})}
+function del(c,x){if(confirm('Remove this item?')){items(c).splice(x,1);save();render()}}
+function copyS(){let t="LION'S PC Build\n\n",tot=0;CS().forEach(c=>items(c.id).forEach(it=>{tot+=lt(it);t+=`${c.n}: ${title(c,it)}${(+it.qty||1)>1?' x'+it.qty:''} - ${fmt(lt(it))}\n`}));t+=`\nTOTAL: ${fmt(tot)}`;
+ try{navigator.clipboard.writeText(t).then(()=>alert('Copied!'),()=>prompt('Copy:',t))}catch(e){prompt('Copy:',t)}}
+document.getElementById('th').onclick=()=>{const r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()=='#151412';r.dataset.theme=d?'light':'dark'};
+render();
+</script></body></html>
